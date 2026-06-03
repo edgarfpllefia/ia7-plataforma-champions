@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  EDITOR
+  ADMIN
+}
+
+enum MatchStatus {
+  SCHEDULED
+  PLAYED
+}
+
+enum MatchPhase {
+  FASE_LIGA
+  OCTAVOS
+  CUARTOS
+  SEMIFINALES
+  FINAL
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(USER)
+  avatarUrl    String?
+  active       Boolean   @default(true)
+  comments     Comment[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  country     String
+  group       String
+  logoUrl     String?
+  season      String
+  homeMatches Match[]  @relation("HomeTeam")
+  awayMatches Match[]  @relation("AwayTeam")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([name, season])
+}
+
+model Match {
+  id         String      @id @default(cuid())
+  homeTeamId String
+  awayTeamId String
+  homeTeam   Team        @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam   Team        @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  matchDate  DateTime
+  matchday   Int
+  phase      MatchPhase  @default(FASE_LIGA)
+  status     MatchStatus @default(SCHEDULED)
+  homeGoals  Int?
+  awayGoals  Int?
+  imageUrl   String?
+  comments   Comment[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  matchId   String
+  authorId  String
+  match     Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
