@@ -59,6 +59,17 @@ Browser → Next.js (RSC / Server Actions / Route Handlers)
 - A **Supabase** project (Postgres + Auth + Storage buckets configured)
 - **Git**
 
+## Demo credentials
+
+The database is seeded with the following test accounts:
+
+| Role | Email | Password |
+| ---- | ----- | -------- |
+| Admin | `admin@champions.local` | `Admin1234!` |
+| Editor | `editor@champions.local` | `Editor1234!` |
+
+Any visitor can also register a new account at `/register`.
+
 ## Getting started
 
 ### 1. Clone and install
