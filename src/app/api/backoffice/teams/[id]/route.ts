@@ -11,12 +11,13 @@ const updateTeam = z.object({
   logoUrl: z.string().url().optional().or(z.literal("")),
 });
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(["EDITOR", "ADMIN"]);
+    const { id } = await params;
     const data = updateTeam.parse(await req.json());
     const updated = await prisma.team.update({
-      where: { id: params.id },
+      where: { id },
       data: { ...data, logoUrl: data.logoUrl === "" ? null : data.logoUrl },
     });
     return NextResponse.json(updated);
@@ -25,10 +26,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(["EDITOR", "ADMIN"]);
-    await prisma.team.delete({ where: { id: params.id } });
+    const { id } = await params;
+    await prisma.team.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });

@@ -5,12 +5,13 @@ import { requireAuth } from "@/lib/authz";
 
 const schema = z.object({ content: z.string().min(1).max(500) });
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await requireAuth();
+    const { id } = await params;
     const body = schema.parse(await req.json());
     const created = await prisma.comment.create({
-      data: { content: body.content, matchId: params.id, authorId: session.user.id },
+      data: { content: body.content, matchId: id, authorId: session.user.id },
     });
     return NextResponse.json(created, { status: 201 });
   } catch {
