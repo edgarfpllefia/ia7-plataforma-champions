@@ -11,11 +11,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const file = form.get("file");
     if (!(file instanceof File)) return NextResponse.json({ error: "File required" }, { status: 400 });
 
-    const key = `teams/${id}/logo-${Date.now()}.webp`;
-    const logoUrl = await uploadImage(process.env.SUPABASE_BUCKET_TEAMS!, key, file);
+    const ext = file.name.split(".").pop() ?? "png";
+    const key = `teams/${id}/logo-${Date.now()}.${ext}`;
+    const bucket = process.env.SUPABASE_BUCKET_TEAMS ?? "teams";
+    const logoUrl = await uploadImage(bucket, key, file);
     const updated = await prisma.team.update({ where: { id }, data: { logoUrl } });
     return NextResponse.json(updated);
-  } catch {
-    return NextResponse.json({ error: "Upload failed" }, { status: 400 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Upload failed";
+    console.error("Logo upload error:", message);
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

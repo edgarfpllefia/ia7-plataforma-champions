@@ -49,7 +49,8 @@ export default function NuevoEquipoPage() {
       router.push("/backoffice/equipos");
       router.refresh();
     } else {
-      alert("Error al subir el logo");
+      const data = await res.json().catch(() => ({}));
+      alert(`Error al subir el logo: ${data.error ?? "Error desconocido"}`);
     }
   }
 

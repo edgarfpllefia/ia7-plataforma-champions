@@ -15,6 +15,7 @@ type Team = {
 export default function EditarEquipoClient({ team }: { team: Team }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
   const router = useRouter();
 
   async function onSubmit(formData: FormData) {
@@ -42,17 +43,20 @@ export default function EditarEquipoClient({ team }: { team: Team }) {
   }
 
   async function uploadLogo(file: File) {
+    setLogoUploading(true);
     const form = new FormData();
     form.append("file", file);
     const res = await fetch(`/api/backoffice/teams/${team.id}/logo`, {
       method: "POST",
       body: form,
     });
+    setLogoUploading(false);
     if (res.ok) {
       alert("Logo actualizado correctamente");
       router.refresh();
     } else {
-      alert("Error al subir el logo");
+      const data = await res.json().catch(() => ({}));
+      alert(`Error al subir el logo: ${data.error ?? "Error desconocido"}`);
     }
   }
 
