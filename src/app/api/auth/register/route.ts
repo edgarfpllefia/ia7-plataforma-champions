@@ -4,24 +4,39 @@ import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
 const registerSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(8),
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 export async function POST(req: Request) {
   try {
-    const data = registerSchema.parse(await req.json());
-    const exists = await prisma.user.findUnique({ where: { email: data.email } });
-    if (exists) return NextResponse.json({ error: "Email already exists" }, { status: 409 });
+    const body = await req.json();
+    const result = registerSchema.safeParse(body);
 
-    const passwordHash = await hash(data.password, 10);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error.errors[0].message },
+        { status: 400 }
+      );
+    }
+
+    const { name, email, password } = result.data;
+
+    const exists = await prisma.user.findUnique({ where: { email } });
+    if (exists) {
+      return NextResponse.json({ error: "Este email ya está registrado" }, { status: 409 });
+    }
+
+    const passwordHash = await hash(password, 10);
     const created = await prisma.user.create({
-      data: { ...data, passwordHash, role: "USER" },
+      data: { name, email, passwordHash, role: "USER" },
       select: { id: true, name: true, email: true, role: true },
     });
+
     return NextResponse.json(created, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+  } catch (err) {
+    console.error("Register error:", err);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
