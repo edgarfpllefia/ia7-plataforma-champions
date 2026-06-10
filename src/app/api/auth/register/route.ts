@@ -15,10 +15,8 @@ export async function POST(req: Request) {
     const result = registerSchema.safeParse(body);
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error.errors[0].message },
-        { status: 400 }
-      );
+      const firstError = result.error.issues[0]?.message ?? "Datos inválidos";
+      return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
     const { name, email, password } = result.data;
