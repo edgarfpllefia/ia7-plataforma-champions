@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import DeleteTeamButton from "./DeleteTeamButton";
 
 export default async function BackofficeEquiposPage() {
   const session = await auth();
@@ -59,23 +60,5 @@ export default async function BackofficeEquiposPage() {
         ))}
       </div>
     </main>
-  );
-}
-
-function DeleteTeamButton({ id, name }: { id: string; name: string }) {
-  return (
-    <form action={async () => {
-      "use server";
-      const { prisma: db } = await import("@/lib/prisma");
-      await db.team.delete({ where: { id } });
-    }}>
-      <button
-        type="submit"
-        onClick={(e) => { if (!confirm(`¿Borrar ${name}?`)) e.preventDefault(); }}
-        className="text-xs text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg border border-red-500/20 hover:bg-red-500/10 transition-colors"
-      >
-        Borrar
-      </button>
-    </form>
   );
 }
