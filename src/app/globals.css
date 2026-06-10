@@ -89,3 +89,15 @@
 .font-dm {
   font-family: var(--font-dm), sans-serif;
 }
+
+/* Fix select dropdown dark theme */
+select {
+  background-color: #0d1225;
+  color: white;
+  color-scheme: dark;
+}
+
+select option {
+  background-color: #0d1225;
+  color: white;
+}
