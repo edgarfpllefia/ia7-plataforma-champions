@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import DeleteMatchButton from "./DeleteMatchButton";
 
 const phases = [
   { key: "FASE_LIGA", label: "Fase Liga" },
@@ -133,6 +134,7 @@ export default async function BackofficePartidosPage({
               >
                 Editar
               </Link>
+              <DeleteMatchButton id={match.id} />
             </div>
           </div>
         ))}
